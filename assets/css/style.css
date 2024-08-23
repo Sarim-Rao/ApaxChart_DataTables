@@ -1,0 +1,90 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: var(--secondary-color);
+    height: 100vh;
+    
+}
+:root {
+    --primary-color: #bc6c25;
+    --secondary-color: #fefae0;
+    --accent-color: #283618;
+    --first-background-color: #dda15e;
+    --second-background-color: #606c38;
+    --text-color: #ffffff;
+  }
+  
+.custom-container{
+    width: 500px;
+    margin: 20px auto;
+    background-color: var(--first-background-color);
+    padding: 20px;
+    border-radius: 8px;
+}
+.submit-btn{
+    background-color: var(--second-background-color);
+    color: var(--text-color);
+}
+.submit-btn:hover{
+    background-color: var(--second-background-color);
+    color: var(--text-color);
+}
+
+    .dt-paging-button {
+      border-radius: 0px !important;
+      gap: 10px !important;
+      border: 1px solid #E0E2E6 !important;
+      background-color: transparent !important;
+      color: white !important;
+      margin: 0 !important;
+      font-size: 16px;
+      transition: all 0.1s linear !important;
+  }
+
+  .dt-paging-button:hover {
+      background: #563150 !important;
+      color: #ffffff !important;
+      border-color: #563150 !important;
+  }
+
+  .dt-paging-button:first-of-type {
+      border-top-left-radius: 10px !important;
+      border-bottom-left-radius: 10px !important;
+  }
+
+  .dt-paging-button:last-of-type {
+      border-top-right-radius: 10px !important;
+      border-bottom-right-radius: 10px !important;
+  }
+
+  .dt-paging-button.current {
+      background-color: #563150 !important;
+      color: #ffffff !important;
+      border-color: #563150 !important;
+  }
+
+  div.dt-container .dt-paging .dt-paging-button.current,
+  div.dt-container .dt-paging .dt-paging-button.current:hover {
+      color: #ffffff !important;
+
+  }
+
+  .edited-parent{
+    display: none;
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(0,0,0,0.7);
+    position: absolute;
+    top: 0%;
+  
+  }
+  .edit-data{
+    width: 500px;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #dda15e;
+    margin: 150px auto;
+  }
