@@ -133,26 +133,29 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
+
     <script>
         let alldata = [];
         let labels = [];
         let series = [];
+        let chart;
+    
         $(document).ready(function () {
             $('.single-select').select2();
             $('.multi-select').select2();
-
+    
             let table = $('#dataTables').DataTable();
-            updateChart()
-
+            updateChart(); 
+    
             $("form").on("submit", function (e) {
-                debugger;
                 e.preventDefault();
-
+    
                 let firstName = $("#FirstName").val().trim();
                 let lastName = $("#LastName").val().trim();
                 let inputEmail = $("#InputEmail").val().trim();
                 let singleSelect = $("#single-select").val();
                 let multiSelect = $("#multi-select").val();
+    
                 if (!firstName || !lastName || !inputEmail || !singleSelect || !multiSelect || multiSelect.length === 0) {
                     Swal.fire({
                         icon: 'warning',
@@ -161,9 +164,9 @@
                     });
                     return;
                 }
-
+    
                 multiSelect = multiSelect.join(", ");
-
+    
                 table.row.add([
                     firstName,
                     lastName,
@@ -175,42 +178,40 @@
                     <button type="button" class="btn btn-outline-danger delete-btn"><i class="bi bi-trash"></i></button>
                     `
                 ]).draw(false);
+    
                 alldata.push({
                     firstName,
                     lastName,
                     inputEmail,
                     singleSelect,
                     multiSelect
-                })
-                updateChart(singleSelect, multiSelect)
-
+                });
+    
+                updateChart(singleSelect);
+    
                 $('form')[0].reset();
                 $('.single-select').val(null).trigger('change');
                 $('.multi-select').val(null).trigger('change');
             });
-
-
+    
             // Edit functionality
-
             $('#dataTables tbody').on('click', '.edit-btn', function () {
                 let row = $(this).closest('tr');
                 let data = table.row(row).data();
-                console.log(data)
-
+    
                 $(".edited-parent").show();
-
+    
                 let availableStatuses = ["completed", "pending", "in_progress", "declined", "approved"];
-                let availableIndustries = ["quickFix_solutions", "prime_properties", "first_class_ventures", "elite_events", "all_star_Services", "golden_gates_realty", "dynamic_designs"];
-
-
+                let availableIndustries = ["quickFix_solutions", "prime_properties", "first_class_ventures", "elite_events", "all_star_services", "golden_gates_realty", "dynamic_designs"];
+    
                 let statusOptions = availableStatuses.map(status => `
-                         <option value="${status}" ${status === data[3] ? 'selected' : ''}>${status}</option>
+                     <option value="${status}" ${status === data[3] ? 'selected' : ''}>${status}</option>
                     `).join('');
-
+    
                 let industryOptions = availableIndustries.map(industry => `
                     <option value="${industry}" ${data[4].split(", ").includes(industry) ? 'selected' : ''}>${industry}</option>
                 `).join('');
-
+    
                 let editForm = `
                 <form id="edit-form">
                     <div class="form-group">
@@ -242,22 +243,22 @@
                         <button type="button" class="btn btn-outline-danger cancel-btn">Cancel</button>
                     </div>
                 </form>`;
-
+    
                 $(".edit-data").html(editForm);
                 $('.single-select').select2();
                 $('.multi-select').select2();
-
+    
                 $(".cancel-btn").on("click", function () {
                     $(".edited-parent").hide();
                 });
-
+    
                 $(".save-edit-btn").on("click", function () {
                     let updatedFirstName = $("#editFirstName").val().trim();
                     let updatedLastName = $("#editLastName").val().trim();
                     let updatedEmail = $("#editEmail").val().trim();
                     let updatedSingleSelect = $("#editSingleSelect").val();
                     let updatedMultiSelect = $("#editMultiSelect").val().join(", ");
-
+    
                     if (!updatedFirstName || !updatedLastName || !updatedEmail || !updatedSingleSelect || !updatedMultiSelect) {
                         Swal.fire({
                             icon: 'warning',
@@ -266,7 +267,7 @@
                         });
                         return;
                     }
-
+    
                     table.row(row).data([
                         updatedFirstName,
                         updatedLastName,
@@ -278,39 +279,70 @@
                         <button type="button" class="btn btn-outline-danger delete-btn"><i class="bi bi-trash"></i></button>
                         `
                     ]).draw(false);
-
+    
+                    let rowIndex = table.row(row).index();
+    
+                    alldata[rowIndex] = {
+                        firstName: updatedFirstName,
+                        lastName: updatedLastName,
+                        inputEmail: updatedEmail,
+                        singleSelect: updatedSingleSelect,
+                        multiSelect: updatedMultiSelect
+                    };
+    
+                    updateChart(updatedSingleSelect);
+    
                     $(".edited-parent").hide();
                 });
             });
-
-
-            // delete functionality 
-
+    
+            // Delete functionality
             $('#dataTables tbody').on('click', '.delete-btn', function () {
                 let row = $(this).closest('tr');
+                let rowIndex = table.row(row).index();
+    
+                alldata = alldata.filter((_, index) => index !== rowIndex);
+    
+                let deleteSingleSelect = table.row(row).data()[3];
+                let deletedLabelIndex = labels.findIndex(label => label === deleteSingleSelect);
+                if (deletedLabelIndex !== -1) {
+                    labels.splice(deletedLabelIndex, 1);
+                    series.splice(deletedLabelIndex, 1);
+                }
+    
                 table.row(row).remove().draw();
+                updateChart();
+    
                 Swal.fire("Deleted!");
             });
         });
-
-        // pie chart
-        let chart;
-
-        let updateChart = (singleSelect, multiSelect) => {
-            let currentLabelIndex = 0;
-            let currentEntriesCount = 0;
+    
+        // Function to update pie chart
+        function updateChart(singleSelect) {
+            labels = [];
+            series = [];
+        
+            alldata.forEach(item => {
+                let index = labels.indexOf(item.singleSelect);
+                console.log(index)
+                if (index === -1) {
+                    labels.push(item.singleSelect);
+                    series.push(1);
+                } else {
+                    series[index]++;
+                }
+            });
+        
             if (singleSelect) {
-                if(labels.includes(singleSelect)){
-                    currentLabelIndex = labels.findIndex(label => label == singleSelect);
-                }
-                else{
+                let index = labels.indexOf(singleSelect);
+                if (index === -1) {
                     labels.push(singleSelect);
-                    currentLabelIndex = labels.findIndex(label => label == singleSelect);
+                    series.push(alldata.filter(item => item.singleSelect.toLowerCase() === singleSelect.toLowerCase()).length);
+                } else {
+                    series[index] = alldata.filter(item => item.singleSelect.toLowerCase() === singleSelect.toLowerCase()).length;
                 }
-                currentEntriesCount = alldata.filter(item=>item.singleSelect.toLowerCase() == singleSelect.toLowerCase()).length;
-                series[currentLabelIndex] = currentEntriesCount;
             }
-
+        
             var options = {
                 series: series,
                 chart: {
@@ -330,19 +362,16 @@
                     }
                 }]
             };
-
-
+        
             if (chart) {
-                chart.updateOptions(options); // Update the existing chart
+                chart.updateOptions(options); // Update existing chart
             } else {
                 chart = new ApexCharts(document.getElementById("pieChart"), options);
-                chart.render(); // Render the new chart
+                chart.render(); // Render new chart
             }
         }
-
     </script>
-
-
+    
 
 </body>
 
